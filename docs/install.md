@@ -31,6 +31,14 @@ The project does not auto-install these tools. Run installs only when you explic
 
 ## Install CLI
 
+Recommended one-command setup from the repo root:
+
+```bash
+./scripts/install.sh
+```
+
+This runs the local CLI install, syncs the Codex skill, and checks the resulting setup.
+
 Recommended local editable install from the repo root:
 
 ```bash

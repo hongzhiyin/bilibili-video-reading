@@ -20,8 +20,7 @@ The skill source lives in `skill/` and can be synced to:
 ```
 
 ```bash
-./scripts/install_cli.sh
-./scripts/sync_skill.sh
+./scripts/install.sh
 ./.venv/bin/bvr tools doctor
 ./.venv/bin/bvr subtitles export "https://www.bilibili.com/video/BV..."
 ./.venv/bin/bvr media sample "https://www.bilibili.com/video/BV..."
