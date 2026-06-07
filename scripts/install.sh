@@ -7,6 +7,10 @@ echo "==> Install local CLI wrapper"
 "$PROJECT_DIR/scripts/install_cli.sh"
 
 echo
+echo "==> Install command entry and shell fallback"
+"$PROJECT_DIR/scripts/install_command.sh"
+
+echo
 echo "==> Sync Codex skill"
 "$PROJECT_DIR/scripts/sync_skill.sh"
 

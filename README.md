@@ -20,10 +20,10 @@ The skill source lives in `skill/` and can be synced to:
 ```
 
 ```bash
-./scripts/install.sh
-./.venv/bin/bvr tools doctor
-./.venv/bin/bvr subtitles export "https://www.bilibili.com/video/BV..."
-./.venv/bin/bvr media sample "https://www.bilibili.com/video/BV..."
+make install
+bvr tools doctor
+bvr subtitles export "https://www.bilibili.com/video/BV..."
+bvr media sample "https://www.bilibili.com/video/BV..."
 ```
 
 Whisper models are external assets. Set `WHISPER_CPP_MODEL` or `BVR_WHISPER_MODEL`, or keep a model in the installed skill asset directory. Do not commit model binaries to this source tree.

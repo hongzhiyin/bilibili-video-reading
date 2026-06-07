@@ -34,10 +34,24 @@ The project does not auto-install these tools. Run installs only when you explic
 Recommended one-command setup from the repo root:
 
 ```bash
-./scripts/install.sh
+make install
 ```
 
-This runs the local CLI install, syncs the Codex skill, and checks the resulting setup.
+If `make` is unavailable, run:
+
+```bash
+sh scripts/install.sh
+```
+
+This runs the local CLI install, installs a `bvr` command entry in a writable PATH directory, writes a `BVR_PROJECT_DIR` shell fallback when needed, syncs the Codex skill, and checks the resulting setup.
+
+From a fresh clone:
+
+```bash
+git clone https://github.com/hongzhiyin/bilibili-video-reading.git "$HOME/Project/bilibili-video-reading"
+cd "$HOME/Project/bilibili-video-reading"
+make install
+```
 
 Recommended local editable install from the repo root:
 
@@ -54,16 +68,18 @@ Use the local command directly:
 ./.venv/bin/bvr tools doctor
 ```
 
-To make `bvr` available in the current shell:
+To install `bvr` as a command in a writable PATH directory:
 
 ```bash
-export PATH="$PWD/.venv/bin:$PATH"
+./scripts/install_command.sh
 ```
 
-To let the installed skill use a source checkout fallback when `bvr` is not on PATH:
+This prefers an existing writable command directory such as `/opt/homebrew/bin` or `/usr/local/bin`, and falls back to `~/.local/bin`. If it uses a directory not already in PATH, it adds that directory to `~/.zprofile`.
+
+To let the installed skill use a source checkout fallback when `bvr` is not on PATH, the installer writes:
 
 ```bash
-export BVR_PROJECT_DIR="$PWD"
+export BVR_PROJECT_DIR="/path/to/bilibili-video-reading"
 ```
 
 For a packaged editable install, use your own environment manager such as `pipx`, or explicitly install into a virtual environment with packaging tools available:
