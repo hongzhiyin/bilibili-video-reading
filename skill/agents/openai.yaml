@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bilibili Video Reading"
+  short_description: "读取 B 站视频内容，支持字幕、ASR 与画面采样"
+  default_prompt: "Use $bilibili-video-reading to read a Bilibili video URL, extract transcript or visual artifacts, and summarize or analyze the content."

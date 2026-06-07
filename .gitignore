@@ -1,0 +1,33 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+build/
+dist/
+
+bilibili-video-reading-tmp/
+
+# Large/generated media artifacts
+*.mp4
+*.mkv
+*.webm
+*.mov
+*.m4v
+*.m4a
+*.mp3
+*.opus
+*.ogg
+*.wav
+
+# External assets only. Do not commit Whisper model binaries.
+assets/models/
+models/whisper/
+skill/assets/models/
