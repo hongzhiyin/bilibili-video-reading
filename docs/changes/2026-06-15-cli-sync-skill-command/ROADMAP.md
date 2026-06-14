@@ -5,7 +5,7 @@
 ## 0. Current Status
 
 **Phase**: Implementation
-**Current Step**: Step 3 - verify and release
+**Current Step**: Step 3 - verified and closed
 **Architecture Omission Reason**: Omitted; this change adds a thin CLI wrapper
 around the existing `scripts/sync_skill.sh` lifecycle and does not alter module
 boundaries, target path layout, marker semantics, or install data flow.
@@ -24,10 +24,10 @@ boundaries, target path layout, marker semantics, or install data flow.
 
 ### Completion Gate
 
-- [ ] All implementation tasks complete or have explicit skip reasons
-- [ ] Acceptance criteria verified one by one
-- [ ] Docs match final implementation
-- [ ] Remaining risks and follow-up work recorded
+- [x] All implementation tasks complete or have explicit skip reasons
+- [x] Acceptance criteria verified one by one
+- [x] Docs match final implementation
+- [x] Remaining risks and follow-up work recorded
 
 ## 2. Research Log
 
@@ -44,7 +44,7 @@ boundaries, target path layout, marker semantics, or install data flow.
 | 0 | Establish packet | Done |
 | 1 | Research sync/update behavior | Done |
 | 2 | Implement command and docs | Done |
-| 3 | Verify and release | In progress |
+| 3 | Verify and release | Done |
 
 ---
 
@@ -98,14 +98,14 @@ boundaries, target path layout, marker semantics, or install data flow.
 **Goal**: Verify the command locally, publish it, and update the native install.
 
 **Tasks**:
-- [ ] Run unit tests
-- [ ] Run `bvr sync-skill --help`
-- [ ] Run dry-run sync smoke
-- [ ] Run `skillcli audit`
-- [ ] Run `docdev audit`
+- [x] Run unit tests
+- [x] Run `bvr sync-skill --help`
+- [x] Run dry-run sync smoke
+- [x] Run `skillcli audit`
+- [x] Run `docdev audit`
 - [x] Smoke test packaged native install from local release assets
-- [ ] Package and publish patch release
-- [ ] Update local native install
+- [x] Package and publish patch release
+- [x] Update local native install
 
 **Acceptance**:
 1. All verification rows pass.
@@ -117,9 +117,13 @@ boundaries, target path layout, marker semantics, or install data flow.
 | AC-1 | `PYTHONPATH=src python3 -m bilibili_video_reading.cli sync-skill --help` | Pass | Command and options shown |
 | AC-2 | `PYTHONPATH=src python3 -m bilibili_video_reading.cli sync-skill --targets codex --dry-run` | Pass | Printed Codex target path |
 | AC-3 | `PYTHONPATH=src python3 -m unittest discover -s tests` | Pass | 12 tests passed |
-| AC-4 | `skillcli audit /Users/chihoyo/Project/bilibili-video-reading --write-report` | Pending | Warns until native install is updated and skill targets resynced |
+| AC-4 | `skillcli audit /Users/chihoyo/Project/bilibili-video-reading --write-report` | Pass | No findings after native update synced skill targets |
 | AC-5 | `docdev audit /Users/chihoyo/Project/bilibili-video-reading --write-report` | Pass | No findings |
 | AC-6 | `env BVR_INSTALL_ROOT=/private/tmp/bvr-sync-skill-smoke-20260615/root ... ./scripts/install_remote.sh --release-base-url file:///Users/chihoyo/Project/bilibili-video-reading/dist/releases --sync-skill` | Pass | Installed packaged `v0.1.2`; temp `bvr sync-skill --dry-run` worked |
+| AC-7 | `bvr update --version 0.1.2 --sync-skill` | Pass | Local native install now points at `~/.local/share/bvr/releases/0.1.2`; doctor status `ok` |
+| AC-8 | `bvr sync-skill --targets codex,cursor,agents,claude --dry-run` | Pass | Printed all four installed skill target paths |
+| AC-9 | `gh release view v0.1.2 --json tagName,url,name,isDraft,isPrerelease,publishedAt` | Pass | Published release `bvr v0.1.2` |
+| AC-10 | `curl -I -L https://github.com/hongzhiyin/bilibili-video-reading/releases/latest/download/install_remote.sh` | Pass | Latest installer redirects to `v0.1.2` and returns HTTP 200 |
 
 ## 5. Risks and Follow-Up
 
