@@ -20,13 +20,15 @@ bilibili-video-reading/
 │   ├── tools.py        # local capability checks
 │   ├── net.py          # HTTP helpers and redaction
 │   ├── manifest.py     # manifest.json writer
-│   └── common.py       # shared parsing/path/process helpers
+│   ├── common.py       # shared parsing/path/process helpers
+│   └── release.py      # native update/uninstall planning
 └── tests/
 ```
 
 ## CLI Responsibilities
 
 - `bvr parse <source>`: extract BVID and canonical URL without network access.
+- `bvr diagnose <source>`: produce an issue-ready report combining DNS, tool capability, video resolution, subtitle lookup/body download, and optional `yt-dlp` audio fallback status.
 - `bvr subtitles export <source>`: public subtitle lookup, WBI fallback, subtitle index parsing, direct subtitle URL download, SRT/transcript conversion.
 - `bvr subtitles convert <json>`: convert manually copied subtitle JSON response bodies.
 - `bvr media download <source>`: download public audio/video with `yt-dlp`.
@@ -38,7 +40,7 @@ bilibili-video-reading/
 ## Skill Responsibilities
 
 - Choose whether the user's task needs subtitles, ASR, sampled visuals, or a mixture.
-- Use Chrome fallback when CLI diagnostics report `need_login_subtitle`, `no_subtitle_url_found`, `subtitle_download_failed`, or `subtitle_download_failed_fake_ip`.
+- Use Chrome fallback when CLI diagnostics report `need_login_subtitle`, `no_subtitle_url_found`, `subtitle_download_failed`, `subtitle_download_failed_fake_ip`, or `diagnostic_state=subtitle_index_ok_body_blocked`.
 - Avoid cookie extraction and browser profile inspection.
 - Decide whether ASR output is trustworthy enough, especially for music/MMD/gameplay clips.
 - Interpret transcripts, frames, OCR/vision notes, and limitations for the user.
@@ -56,7 +58,7 @@ The manifest is intentionally evidence-like. It records what happened; it does n
 
 ## Asset Policy
 
-This source tree must not depend on `/Users/chihoyo/Project/Idea` and must not contain Whisper model binaries. Model discovery checks:
+This source tree must not depend on any private local project path and must not contain Whisper model binaries. Model discovery checks:
 
 - explicit `--model`
 - `WHISPER_CPP_MODEL`
@@ -67,7 +69,7 @@ This source tree must not depend on `/Users/chihoyo/Project/Idea` and must not c
 
 ## Portability
 
-The installed skill should call `bvr` rather than a hard-coded source checkout path. If `bvr` is unavailable, `BVR_PROJECT_DIR` may point to a checkout and the module form can be used:
+The installed skill should call `bvr` rather than a hard-coded source checkout path. A native install writes `~/.local/bin/bvr` and sync generates skill-local `bin/bvr`. If neither command is available, `BVR_PROJECT_DIR` may point to a checkout or native release and the module form can be used:
 
 ```bash
 PYTHONPATH="$BVR_PROJECT_DIR/src" python3 -m bilibili_video_reading.cli <command>

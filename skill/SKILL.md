@@ -1,6 +1,10 @@
 ---
 name: bilibili-video-reading
 description: Read, summarize, analyze, translate, or archive Bilibili video content by turning Bilibili video links into AI-readable transcript, ASR, OCR, or visual artifacts. Use for requests like "read this Bilibili video", "summarize this B站 link", "analyze this BV video", or "extract subtitles"; subtitles are preferred, with logged-in Chrome triggering, ASR, and visual/OCR fallback when needed.
+metadata:
+  requires:
+    bins: ["bvr"]
+  cliHelp: "bvr --help"
 ---
 
 # Bilibili Video Reading
@@ -26,13 +30,27 @@ Run deterministic helper commands with:
 bvr <command>
 ```
 
-If `bvr` is unavailable but `BVR_PROJECT_DIR` points to a source checkout, use:
+If `bvr` is not on PATH, try the installed skill-local wrapper when this skill
+directory is visible:
+
+```bash
+bin/bvr <command>
+```
+
+If neither command works but `BVR_PROJECT_DIR` points to a source checkout or
+native release, use:
 
 ```bash
 PYTHONPATH="$BVR_PROJECT_DIR/src" python3 -m bilibili_video_reading.cli <command>
 ```
 
-If neither works, ask the user to install/sync the project first. The installed skill delegates deterministic work to the current project CLI.
+If none of these works, ask the user to install or update the native release:
+
+```bash
+curl -fsSL https://github.com/hongzhiyin/bilibili-video-reading/releases/latest/download/install_remote.sh | sh
+```
+
+The installed skill delegates deterministic work to the current `bvr` CLI.
 
 Unless the user asks to save artifacts elsewhere, put run artifacts under:
 
@@ -54,6 +72,14 @@ Unless the user asks to save artifacts elsewhere, put run artifacts under:
 
 When the user asks to read a Bilibili video, do not require them to say "use my logged-in Chrome." Assume their normal browser may already have login state and use it only when public subtitle retrieval fails.
 
+If another agent or project reports a brittle Bilibili failure, collect a single structured report first:
+
+```bash
+bvr diagnose "https://www.bilibili.com/video/BV..." --output-dir ./bilibili-video-reading-tmp/BV...
+```
+
+Use `--try-media` only when it is acceptable to test `yt-dlp` audio fallback. The diagnostic report merges DNS, tool capability, video resolution, subtitle index/body status, and media failure classification without reading browser cookies.
+
 1. Run subtitle export first:
 
 ```bash
@@ -64,7 +90,7 @@ The CLI resolves video metadata, checks public subtitle data, tries WBI-signed s
 
 2. If the CLI status is `ok`, read the generated transcript and complete the user's content task.
 
-3. If the CLI reports `need_login_subtitle`, `no_subtitle_url_found`, `subtitle_download_failed`, `subtitle_download_failed_fake_ip`, or an empty subtitle list, use logged-in Chrome automatically:
+3. If the CLI reports `need_login_subtitle`, `no_subtitle_url_found`, `subtitle_download_failed`, `subtitle_download_failed_fake_ip`, `diagnostic_state=subtitle_index_ok_body_blocked`, or an empty subtitle list, use logged-in Chrome automatically:
 
 - Use the `chrome:control-chrome` skill.
 - Open or claim the Bilibili video page.
@@ -128,6 +154,7 @@ bvr subtitles export "BV..." --lang zh --output-dir ./bilibili-video-reading-tmp
 bvr subtitles export "BV..." --aid <aid> --cid <cid> --output-dir ./bilibili-video-reading-tmp/BV...
 bvr subtitles export "BV..." --subtitle-index-url "<observed web/view URL>" --output-dir ./bilibili-video-reading-tmp/BV...
 bvr subtitles export "BV..." --proxy http://127.0.0.1:7897 --output-dir ./bilibili-video-reading-tmp/BV...
+bvr diagnose "BV..." --try-media --output-dir ./bilibili-video-reading-tmp/BV...
 bvr tools doctor
 ```
 
@@ -141,6 +168,7 @@ Use `--save-full-urls` only when the full short-lived subtitle URLs are needed l
 - After selecting a language in Chrome, the player may request a more directly downloadable `aisubtitle.hdslb.com/bfs/ai_subtitle/prod/...` URL. Prefer that final JSON URL over `subtitle.bilibili.com`.
 - `subtitle.bilibili.com` and `aisubtitle.hdslb.com` URLs are short-lived because they contain `auth_key`; if download fails due to expiry, refresh the page or re-run the Chrome trigger.
 - If `subtitle.bilibili.com` resolves to a fake IP such as `198.18.x.x` or TLS fails, prefer collecting the final `aisubtitle.hdslb.com` URL. Try a local proxy only once; if CONNECT succeeds but TLS still fails, move on to Response-only fallback or ASR/OCR.
+- `diagnostic_state=subtitle_index_ok_body_blocked` means the subtitle index was reachable and yielded candidates, but the direct subtitle JSON body fetch was blocked. Do not repeat the same direct URL; move to Chrome-triggered `aisubtitle.hdslb.com`, Response-only fallback, or ASR/OCR.
 - If `yt-dlp` returns HTTP 412, retry once with the CLI's Chrome-like User-Agent and referer defaults; do not spend turns retrying the same bare command.
 - If Chrome auto-plays to the next collection item, navigate back to the original BVID before sampling frames or reading page text.
 - If Whisper output looks like garbled lyrics or background music, do not treat it as a reliable transcript. Use visual notes as the primary source and mention the limitation.

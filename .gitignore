@@ -14,6 +14,7 @@ build/
 dist/
 
 bilibili-video-reading-tmp/
+docs/_generated/
 
 # Large/generated media artifacts
 *.mp4

@@ -7,7 +7,9 @@ from pathlib import Path
 
 from bilibili_video_reading.bilibili import choose_subtitle, parse_binary_subtitle_index
 from bilibili_video_reading.common import extract_bvid, safe_stem
+from bilibili_video_reading.media import classify_yt_dlp_failure
 from bilibili_video_reading.net import redact_url
+from bilibili_video_reading.release import launcher_is_bvr_owned, plan_native_uninstall
 from bilibili_video_reading.subtitles import convert_subtitle_json, timestamp_short, timestamp_srt
 
 
@@ -64,6 +66,55 @@ class CoreHelpersTest(unittest.TestCase):
             transcript = (tmp_path / "demo_transcript.txt").read_text(encoding="utf-8")
             self.assertIn("[00:00] hello", transcript)
             self.assertIn("连续文本", transcript)
+
+    def test_classify_ytdlp_http_412(self) -> None:
+        result = classify_yt_dlp_failure(
+            returncode=1,
+            stdout="[BiliBili] Extracting formats",
+            stderr="ERROR: HTTP Error 412: Precondition Failed",
+        )
+        self.assertEqual(result["status"], "download_failed_http_412")
+        self.assertIn("likely_causes", result)
+        self.assertIn("yt-dlp", result["manual_next_step"])
+
+    def test_classify_ytdlp_dns_failure(self) -> None:
+        result = classify_yt_dlp_failure(
+            returncode=1,
+            stdout="",
+            stderr="<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+        )
+        self.assertEqual(result["status"], "download_failed_dns")
+        self.assertEqual(result["failure_stage"], "media_download")
+
+    def test_launcher_ownership_detection(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            launcher = Path(tmp) / "bvr"
+            launcher.write_text(
+                '#!/bin/sh\nBVR_PROJECT_DIR="/x" PYTHONPATH="/x/src" exec python3 -m bilibili_video_reading.cli "$@"\n',
+                encoding="utf-8",
+            )
+            self.assertTrue(launcher_is_bvr_owned(launcher))
+
+            other = Path(tmp) / "other"
+            other.write_text("#!/bin/sh\necho nope\n", encoding="utf-8")
+            self.assertFalse(launcher_is_bvr_owned(other))
+
+    def test_uninstall_plan_skips_unmarked_skill_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            install_root = root / "install"
+            bin_dir = root / "bin"
+            skill_dir = root / "codex" / "skills" / "bilibili-video-reading"
+            install_root.mkdir()
+            bin_dir.mkdir()
+            skill_dir.mkdir(parents=True)
+            actions = plan_native_uninstall(
+                install_root,
+                bin_dir,
+                keep_skills=False,
+                targets=(),
+            )
+            self.assertIn("remove", {item.action for item in actions})
 
 
 if __name__ == "__main__":

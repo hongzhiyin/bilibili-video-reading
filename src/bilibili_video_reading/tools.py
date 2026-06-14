@@ -159,6 +159,7 @@ def doctor() -> dict:
         "all_match": False,
     }
     installed_scripts_dir = target_skill / "scripts"
+    installed_bin = target_skill / "bin" / "bvr"
     installation = {
         "project_root": str(root),
         "bvr_project_dir_env": bvr_project_dir_env,
@@ -173,6 +174,8 @@ def doctor() -> dict:
         "installed_skill_matches_source": skill_compare["all_match"],
         "installed_skill_file_compare": skill_compare["files"],
         "installed_legacy_scripts_dir_exists": installed_scripts_dir.exists(),
+        "installed_skill_bin": str(installed_bin),
+        "installed_skill_bin_exists": installed_bin.exists(),
     }
     recommendations = list(result.get("recommendations", []))
     if not bvr_command and not project_venv_bvr_exists:
@@ -187,6 +190,8 @@ def doctor() -> dict:
         recommendations.append("Installed skill differs from repo source: ./scripts/sync_skill.sh")
     if installed_scripts_dir.exists():
         recommendations.append("Remove legacy installed scripts: ./scripts/sync_skill.sh")
+    if target_skill.exists() and not installed_bin.exists():
+        recommendations.append("Installed skill is missing bin/bvr: ./scripts/sync_skill.sh --force")
     result["installation"] = installation
     result["recommendations"] = recommendations
     result["status"] = "ok" if not recommendations else "needs_action"

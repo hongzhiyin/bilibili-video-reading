@@ -1,4 +1,4 @@
-.PHONY: install install-cli install-command sync-skill check doctor
+.PHONY: install install-cli install-command sync-skill check doctor update package-release
 
 install:
 	@./scripts/install.sh
@@ -16,3 +16,9 @@ check:
 	@./scripts/check_install.sh
 
 doctor: check
+
+update:
+	@./scripts/update_cli.sh
+
+package-release:
+	@./scripts/package_release.sh

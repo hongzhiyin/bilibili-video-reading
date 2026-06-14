@@ -192,6 +192,8 @@ def export_page(
             diagnostics["subtitle_index_bin"] = str(raw_path)
             diagnostics["subtitle_index_bytes"] = len(raw_bytes)
             subtitle_items = parse_binary_subtitle_index(raw_bytes)
+            diagnostics["subtitle_index_status"] = "ok"
+            diagnostics["subtitle_index_subtitle_count"] = len(subtitle_items)
 
     diagnostics["subtitle_count"] = len(subtitle_items)
     save_subtitle_url_listing(options.output_dir, page_stem_base, subtitle_items, options, diagnostics)
@@ -225,10 +227,16 @@ def export_page(
         diagnostics["error"] = error_text
         diagnostics["error_type"] = exc.__class__.__name__
         diagnostics["subtitle_endpoint"] = endpoint
+        if diagnostics.get("subtitle_index_status") == "ok":
+            diagnostics["diagnostic_state"] = "subtitle_index_ok_body_failed"
+            diagnostics["subtitle_body_status"] = "failed"
         host = endpoint.get("host")
         resolution = endpoint.get("host_resolution") or {}
         if host == "subtitle.bilibili.com" and resolution.get("fake_ip"):
             diagnostics["status"] = "subtitle_download_failed_fake_ip"
+            if diagnostics.get("subtitle_index_status") == "ok":
+                diagnostics["diagnostic_state"] = "subtitle_index_ok_body_blocked"
+                diagnostics["subtitle_body_status"] = "blocked_fake_ip"
             diagnostics["manual_next_step"] = (
                 "Do not keep retrying the same subtitle.bilibili.com URL: this environment resolves "
                 "the host to a 198.18.* fake IP, so direct TLS download is expected to fail. Use "
@@ -236,6 +244,9 @@ def export_page(
                 "the DevTools Response-only fallback, or switch to ASR/OCR."
             )
         elif host == "subtitle.bilibili.com" and ("SSL" in error_text or "EOF" in error_text):
+            if diagnostics.get("subtitle_index_status") == "ok":
+                diagnostics["diagnostic_state"] = "subtitle_index_ok_body_blocked"
+                diagnostics["subtitle_body_status"] = "tls_eof_or_ssl_failed"
             diagnostics["manual_next_step"] = (
                 "Avoid repeated direct retries of the same subtitle.bilibili.com short URL after TLS "
                 "EOF/SSL failure. Prefer a Chrome-triggered aisubtitle.hdslb.com JSON URL. If that "

@@ -14,9 +14,11 @@ from .common import (
     print_json,
     safe_stem,
 )
+from .diagnose import DiagnoseOptions, diagnose
 from .manifest import write_manifest
 from .media import MediaDownloadOptions, VisualSampleOptions, download_media, sample_visuals
 from .net import redact_for_output
+from .release import cmd_uninstall, cmd_update
 from .subtitles import SubtitleExportOptions, convert_subtitle_json, export_subtitles
 from .tools import check_tools, doctor
 
@@ -181,6 +183,33 @@ def cmd_asr_whisper_cpp(args: argparse.Namespace) -> int:
     )
 
 
+def cmd_diagnose(args: argparse.Namespace) -> int:
+    stem = args.stem or (f"bilibili_{extract_bvid(args.source)}" if extract_bvid(args.source) else None)
+    output_dir = ensure_output_dir(args.output_dir, args.source, stem)
+    result, status = diagnose(
+        DiagnoseOptions(
+            source=args.source,
+            output_dir=output_dir,
+            lang=args.lang,
+            page=args.page,
+            proxy=args.proxy,
+            try_media=args.try_media,
+            save_full_urls=args.save_full_urls,
+            format=args.format,
+            user_agent=args.user_agent,
+            referer=args.referer,
+        )
+    )
+    return emit_result(
+        result,
+        status,
+        output_dir=output_dir,
+        command="diagnose",
+        source=args.source,
+        no_manifest=args.no_manifest,
+    )
+
+
 def cmd_tools_check(args: argparse.Namespace) -> int:
     result = check_tools()
     result["status"] = "ok"
@@ -201,6 +230,24 @@ def build_parser() -> argparse.ArgumentParser:
     parse_parser = subparsers.add_parser("parse", help="Parse a Bilibili URL or BVID without network access.")
     parse_parser.add_argument("source")
     parse_parser.set_defaults(func=cmd_parse)
+
+    diagnose_parser = subparsers.add_parser(
+        "diagnose",
+        help="Create an issue-ready subtitle/media fallback diagnostic report.",
+    )
+    diagnose_parser.add_argument("source", help="Bilibili video URL or BVID.")
+    diagnose_parser.add_argument("--lang", default="zh")
+    diagnose_parser.add_argument("--page", type=int, default=1, help="1-based page number for multi-P videos.")
+    diagnose_parser.add_argument("--output-dir")
+    diagnose_parser.add_argument("--stem")
+    diagnose_parser.add_argument("--proxy", help="Optional HTTP proxy URL, for example http://127.0.0.1:7897.")
+    diagnose_parser.add_argument("--try-media", action="store_true", help="Also try yt-dlp audio download fallback.")
+    diagnose_parser.add_argument("--format", default=DEFAULT_MEDIA_FORMAT)
+    diagnose_parser.add_argument("--user-agent", default=DEFAULT_USER_AGENT)
+    diagnose_parser.add_argument("--referer", default=DEFAULT_REFERER)
+    diagnose_parser.add_argument("--save-full-urls", action="store_true", help="Also save unredacted subtitle URLs locally.")
+    add_manifest_flag(diagnose_parser)
+    diagnose_parser.set_defaults(func=cmd_diagnose)
 
     subtitles_parser = subparsers.add_parser("subtitles", help="Subtitle export and conversion commands.")
     subtitles_sub = subtitles_parser.add_subparsers(dest="subcommand", required=True)
@@ -275,6 +322,34 @@ def build_parser() -> argparse.ArgumentParser:
     check_parser.set_defaults(func=cmd_tools_check)
     doctor_parser = tools_sub.add_parser("doctor", help="Check CLI, skill sync, external tools, and model portability.")
     doctor_parser.set_defaults(func=cmd_tools_doctor)
+
+    update_parser = subparsers.add_parser("update", help="Update a native release install.")
+    update_parser.add_argument("--version", default=None, help="Version to install. Default: latest.")
+    update_parser.add_argument("--release-base-url", default=None, help="Manifest/artifact base URL.")
+    update_parser.add_argument("--install-root", default=None, help="Override BVR_INSTALL_ROOT.")
+    update_parser.add_argument("--bin-dir", default=None, help="Override BVR_BIN_DIR.")
+    update_parser.add_argument(
+        "--sync-skill",
+        dest="sync_skill",
+        action="store_true",
+        help="Refresh installed skill targets after update. Default.",
+    )
+    update_parser.add_argument(
+        "--no-sync-skill",
+        dest="sync_skill",
+        action="store_false",
+        help="Update the native release only; skip installed skill sync.",
+    )
+    update_parser.set_defaults(sync_skill=True)
+    update_parser.set_defaults(func=cmd_update)
+
+    uninstall_parser = subparsers.add_parser("uninstall", help="Remove a native release install and owned skill targets.")
+    uninstall_parser.add_argument("--install-root", default=None, help="Override BVR_INSTALL_ROOT.")
+    uninstall_parser.add_argument("--bin-dir", default=None, help="Override BVR_BIN_DIR.")
+    uninstall_parser.add_argument("--keep-skills", action="store_true", help="Remove only the native CLI install.")
+    uninstall_parser.add_argument("--dry-run", action="store_true", help="Preview planned removals without deleting files.")
+    uninstall_parser.add_argument("--yes", action="store_true", help="Confirm destructive uninstall.")
+    uninstall_parser.set_defaults(func=cmd_uninstall)
 
     return parser
 

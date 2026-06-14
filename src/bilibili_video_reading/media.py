@@ -4,6 +4,7 @@ import csv
 import json
 import math
 import shutil
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -47,6 +48,78 @@ VIDEO_SUFFIXES = {".mp4", ".mkv", ".webm", ".mov", ".m4v"}
 AUDIO_SUFFIXES = {".m4a", ".mp3", ".opus", ".ogg", ".wav", ".webm"}
 
 
+def classify_yt_dlp_failure(*, returncode: int, stdout: str, stderr: str, command: list[str] | None = None) -> dict:
+    combined = f"{stderr}\n{stdout}"
+    lowered = combined.lower()
+    diagnostics = {
+        "status": "download_failed",
+        "returncode": returncode,
+        "yt_dlp_stdout_tail": stdout[-4000:],
+        "yt_dlp_stderr_tail": stderr[-4000:],
+    }
+    if command:
+        diagnostics["command"] = command
+
+    if "http error 412" in lowered or "precondition failed" in lowered:
+        diagnostics.update(
+            {
+                "status": "download_failed_http_412",
+                "failure_stage": "media_download",
+                "likely_causes": [
+                    "Bilibili anti-bot or precondition checks rejected the public media request.",
+                    "The video may require logged-in playback state that this CLI intentionally does not read from cookies.",
+                    "yt-dlp's Bilibili extractor or WBI handling may be stale for this request.",
+                ],
+                "manual_next_step": (
+                    "Do not retry the same command repeatedly. Update yt-dlp if available, try again once later "
+                    "with the CLI's Chrome-like defaults, or use the subtitle/Chrome-triggered Response-only "
+                    "path. Do not pass browser cookies or inspect browser profile files."
+                ),
+            }
+        )
+    elif any(token in lowered for token in ["name or service not known", "nodename nor servname", "temporary failure in name resolution"]):
+        diagnostics.update(
+            {
+                "status": "download_failed_dns",
+                "failure_stage": "media_download",
+                "manual_next_step": "Rerun with network access or a configured proxy before trying media fallback again.",
+            }
+        )
+    elif "login" in lowered and ("required" in lowered or "please log" in lowered):
+        diagnostics.update(
+            {
+                "status": "download_failed_login_required",
+                "failure_stage": "media_download",
+                "manual_next_step": (
+                    "Use the logged-in Chrome subtitle flow or ask the user for a safe local media/subtitle artifact; "
+                    "do not read cookies from the browser profile."
+                ),
+            }
+        )
+    elif "http error 403" in lowered or "forbidden" in lowered:
+        diagnostics.update(
+            {
+                "status": "download_failed_forbidden",
+                "failure_stage": "media_download",
+                "manual_next_step": "Treat this as a public media access block; prefer subtitle, Chrome-triggered response, or ASR from safe user-provided media.",
+            }
+        )
+    elif "http error 429" in lowered or "too many requests" in lowered:
+        diagnostics.update(
+            {
+                "status": "download_failed_rate_limited",
+                "failure_stage": "media_download",
+                "manual_next_step": "Stop retrying for now; retry later or use an already available subtitle/media artifact.",
+            }
+        )
+    else:
+        diagnostics["manual_next_step"] = (
+            "Inspect yt-dlp stderr, update yt-dlp if practical, then choose subtitle, Chrome-triggered response, "
+            "safe user-provided media, or visual/OCR fallback based on the video."
+        )
+    return diagnostics
+
+
 def find_downloaded_media(output_dir: Path, stem: str, *, audio_only: bool = False) -> Path | None:
     suffixes = AUDIO_SUFFIXES if audio_only else VIDEO_SUFFIXES
     candidates = sorted(
@@ -86,7 +159,19 @@ def download_public_media(options: MediaDownloadOptions) -> tuple[Path | None, d
         ]
     )
 
-    completed = run_command(cmd)
+    completed = subprocess.run(cmd, text=True, capture_output=True)
+    if completed.returncode != 0:
+        media = find_downloaded_media(options.output_dir, stem, audio_only=options.audio_only)
+        diagnostics = classify_yt_dlp_failure(
+            returncode=completed.returncode,
+            stdout=completed.stdout,
+            stderr=completed.stderr,
+            command=cmd,
+        )
+        if media:
+            diagnostics["partial_media"] = str(media)
+        return None, diagnostics
+
     media = find_downloaded_media(options.output_dir, stem, audio_only=options.audio_only)
     if not media:
         return None, {
