@@ -89,3 +89,38 @@ versioned native install roots, and launcher-based updates.
 - `scripts/package_release.sh`
 - `scripts/install_remote.sh`
 - `src/bilibili_video_reading/release.py`
+
+---
+
+## D-003 - Step 6 - Make Repository Public After Native Install Verification
+
+**Date**: 2026-06-15
+
+**Context**:
+The release assets were published and the local machine was switched to the
+native installer. The user asked why public visibility was still needed for
+unauthenticated remote install, then explicitly said to make the repository
+public.
+
+**Options**:
+- A. Keep the repo private and require `GITHUB_TOKEN` for remote install.
+- B. Change GitHub visibility to public now and leave LICENSE as a follow-up.
+- C. Delay public visibility until LICENSE is chosen.
+
+**Chosen**: B
+
+**Rationale**:
+- It makes `https://github.com/hongzhiyin/bilibili-video-reading/releases/latest/download/install_remote.sh`
+  work for anonymous `curl`.
+- It matches the native install contract documented for ordinary users.
+- The user explicitly confirmed the visibility change.
+
+**Risks**:
+- The repository still has no LICENSE.
+- The existing committed history is now public.
+
+**Related code / docs**:
+- SPEC §9
+- ROADMAP Verification Log Step 6
+- `docs/install.md`
+- `scripts/install_remote.sh`

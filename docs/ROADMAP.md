@@ -5,7 +5,7 @@
 ## Current Progress
 
 **Phase**: Phase 2 - native install implementation
-**Current Step**: Step 2 done; public visibility pending license/confirmation
+**Current Step**: Step 2 done; repository is public; LICENSE remains follow-up
 
 ### Step Status
 
@@ -63,7 +63,8 @@ through native release assets without relying on hidden local state.
 - [x] Generate installed skill-local `bin/bvr` during sync
 - [x] Add skill metadata for required CLI bin and help command
 - [x] Add agent handoff documentation
-- [ ] Decide LICENSE and GitHub visibility
+- [x] Change GitHub visibility to public after user confirmation
+- [ ] Add LICENSE after user chooses one
 - [x] Run verification suite
 
 **Acceptance**:
@@ -75,6 +76,7 @@ through native release assets without relying on hidden local state.
    or each remaining warning has a written skip reason.
 5. Packaged release assets install from a local `file://` base into a temp
    native root.
+6. Latest GitHub Release assets install anonymously from the public repository.
 
 ---
 
@@ -82,7 +84,7 @@ through native release assets without relying on hidden local state.
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Public repo has no LICENSE | External users cannot clearly reuse the project | Choose and add LICENSE before or with visibility change |
+| Public repo has no LICENSE | External users cannot clearly reuse the project | Choose and add LICENSE in a follow-up |
 | Native installer is Unix-shell only | Windows users need manual/source checkout path for now | Track PowerShell parity as a future release |
 | Dirty working tree contains user changes | Accidental overwrite or mixed ownership | Keep implementation scoped and review diffs before edits |
-| GitHub visibility change is irreversible in effect | Private history becomes public | Require explicit final confirmation after readiness checks |
+| GitHub visibility change is irreversible in effect | Private history becomes public | Completed only after explicit user confirmation |

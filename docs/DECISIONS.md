@@ -90,3 +90,39 @@ mutating system Python, or remembering private source paths.
 - `scripts/package_release.sh`
 - `scripts/install_remote.sh`
 - `src/bilibili_video_reading/release.py`
+
+---
+
+## D-003 - Phase 2 - Publish Repository After Native Release Verification
+
+**Date**: 2026-06-15
+
+**Context**:
+The native release was packaged, pushed as `v0.1.0`, installed locally, and
+verified from GitHub Release assets. The user then explicitly confirmed changing
+the repository visibility to public.
+
+**Options**:
+- A. Keep the repository private until a LICENSE is chosen - safest for reuse
+  clarity, but blocks the public `curl` install path.
+- B. Make the repository public now and track LICENSE as a follow-up - enables
+  anonymous install while keeping the remaining policy gap visible.
+- C. Move distribution to a package index first - unnecessary for this release.
+
+**Chosen**: B
+
+**Rationale**:
+- Public GitHub Release assets let new machines install without `GITHUB_TOKEN`.
+- The native installer already verifies the release tarball checksum.
+- The missing LICENSE affects reuse clarity, not whether the public installer can
+  download and run.
+
+**Risks**:
+- `licenseInfo` is still null, so external reuse rights are unclear until a
+  LICENSE is added.
+- Public visibility exposes the existing committed history.
+
+**Related code / docs**:
+- ROADMAP Step 2
+- `docs/install.md`
+- `scripts/install_remote.sh`

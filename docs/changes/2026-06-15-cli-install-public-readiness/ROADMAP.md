@@ -5,7 +5,7 @@
 ## 0. Current Status
 
 **Phase**: Implementation
-**Current Step**: Step 5 - verified; public visibility pending license/confirmation
+**Current Step**: Step 6 - repository public; anonymous release install verified
 **Architecture Omission Reason**: Not omitted; install/sync/update structure is
 part of the requirement.
 
@@ -39,7 +39,7 @@ part of the requirement.
 | R-5 | Update lifecycle | `scripts/update_cli.sh` was missing; native `bvr update` was missing. | `skillcli status --json`, `skillcli audit` | Both source checkout and native update paths are added. |
 | R-6 | Installed state | Codex installed skill exists and matches source files, but installed target initially had no `bin/bvr`. | `bvr tools doctor`, `skillcli audit` | Needs resync after implementation. |
 | R-7 | Tests | Plain `python3 -m unittest discover -s tests` fails because `src/` is not on `PYTHONPATH`; source-layout invocation passes. | command output | Update script uses `PYTHONPATH=src`. |
-| R-8 | Public visibility | GitHub repo is currently private; `gh repo view` returned `visibility: PRIVATE`, `licenseInfo: null`. | `gh repo view hongzhiyin/bilibili-video-reading --json visibility,isPrivate,url,description,licenseInfo` | Do not switch to public until final confirmation. |
+| R-8 | Public visibility | GitHub repo was private during research, then changed to `visibility: PUBLIC` after explicit user confirmation; `licenseInfo` is still null. | `gh repo view hongzhiyin/bilibili-video-reading --json visibility,isPrivate,url,description,licenseInfo` | Public install is now available; add LICENSE as a follow-up. |
 | R-9 | No-secrets scan | Token/cookie scan found safety-rule text, redaction code/tests, and one local path reference; no real cookie/token material was found in tracked source. | `rg -n -S "(SESSDATA|...|/Users/chihoyo)"` | Local path reference was generalized. |
 | R-10 | Native pattern | Sibling projects use `package_release.sh`, `install_remote.sh`, manifest sha256, versioned install root, launcher, and update command. | `docs-driven-dev`, `skill-cli-kit` scripts | Current implementation follows that shape. |
 
@@ -53,6 +53,7 @@ part of the requirement.
 | 3 | Form and confirm plan | Done |
 | 4 | Implement native install/update changes | Done |
 | 5 | Verify and close | Done |
+| 6 | Make repository public and verify remote install | Done |
 
 ---
 
@@ -126,8 +127,7 @@ install rather than source-checkout-first. The current CLI package is fine.
   `docs/skill-cli-boundary.md`.
 
 **Acceptance**:
-1. User confirms the implementation scope. License choice remains before public
-   visibility change.
+1. User confirms the implementation scope. License choice remains a follow-up.
 
 ---
 
@@ -155,7 +155,7 @@ install rather than source-checkout-first. The current CLI package is fine.
 |---|---|---|---|
 | R1 | `skillcli audit /Users/chihoyo/Project/bilibili-video-reading --write-report` | Pass | No findings; report written to `docs/_generated/skillcli/audit.json` |
 | R2 | `git status --short` | In progress | Existing dirty files predated this packet; implementation now touches approved files |
-| R3 | `gh repo view hongzhiyin/bilibili-video-reading --json visibility,isPrivate,url,description,licenseInfo` | Done | Repository is private; no licenseInfo |
+| R3 | `gh repo view hongzhiyin/bilibili-video-reading --json visibility,isPrivate,url,description,licenseInfo` | Done | Repository is public; no licenseInfo |
 | R3 | `rg` no-secrets scan | Done | No real credential material found; docs/tests contain expected safety/redaction text |
 | R4 | `PYTHONPATH=src python3 -m unittest discover -s tests` | Pass | 10 tests passed |
 | R4 | `bvr tools doctor` | Pass | Local install status `ok`; installed Codex `bin/bvr` exists |
@@ -168,13 +168,16 @@ install rather than source-checkout-first. The current CLI package is fine.
 | Step 5 | `which -a bvr` | Pass | Only `/Users/chihoyo/.local/bin/bvr` remains on PATH |
 | Step 5 | `ls -l /opt/homebrew/bin/bvr .venv/bin/bvr` | Pass | Old global source-checkout symlink and local `.venv/bin/bvr` wrapper are absent |
 | Step 5 | `rg -n "BVR_PROJECT_DIR|Bilibili video reading CLI|bilibili-video-reading/.venv/bin/bvr" ~/.zprofile ~/.zshrc` | Pass | No old shell-profile fallback remains |
+| Step 6 | `gh repo edit hongzhiyin/bilibili-video-reading --visibility public --accept-visibility-change-consequences` | Pass | Repository visibility changed after explicit user confirmation |
+| Step 6 | `curl -fsSL -o /private/tmp/bvr-public-install-20260615.sh https://github.com/hongzhiyin/bilibili-video-reading/releases/latest/download/install_remote.sh` | Pass | Latest installer asset is anonymously downloadable |
+| Step 6 | `env BVR_INSTALL_ROOT=/private/tmp/bvr-public-smoke-20260615/root ... sh /private/tmp/bvr-public-install-20260615.sh --sync-skill` | Pass | Downloaded public manifest and tarball, checksum ok, temp native install doctor status `ok` |
 
 ## 5. Risks and Follow-Up
 
 | ID | Risk / Follow-up | Impact | Handling |
 |---|---|---|---|
-| F-1 | Making repo public before adding LICENSE | Reuse rights are unclear | Ask user for license or explicit publish-without-license approval |
+| F-1 | Public repo has no LICENSE | Reuse rights are unclear | Add LICENSE after user chooses one |
 | F-2 | Editing dirty README/skill/code owned by existing work | Could mix unrelated changes | Kept edits scoped to approved install/public readiness work |
 | F-3 | Installed wrapper embeds current release or source path | Moving checkout or release root requires resync | Accept; native update/sync refreshes wrapper |
 | F-4 | Native installer is Unix-shell only | Windows users need manual/source checkout path for now | Track as future PowerShell parity |
-| F-5 | Current GitHub visibility change would publish existing committed history | Private history becomes public | Require explicit confirmation before `gh repo edit --visibility public` |
+| F-5 | GitHub visibility change published existing committed history | Private history became public | Completed only after explicit user confirmation |

@@ -7,7 +7,7 @@
 
 | Field | Content |
 |---|---|
-| Status | Design gate |
+| Status | Implemented; repository made public after explicit confirmation |
 | Request source | User asked whether the current project should adjust CLI creation/install flow and whether the repo can be public |
 | Packet directory | `docs/changes/2026-06-15-cli-install-public-readiness/` |
 | Last updated | 2026-06-15 |
@@ -55,16 +55,16 @@ matches the sibling tool projects and is ready for public release packaging.
 |---|---|---|
 | S1 | Future agent enters another project and needs Bilibili video reading | The skill can resolve `bvr` via PATH, installed skill-local wrapper, or explicit source checkout fallback. |
 | S2 | Maintainer pulls or edits this checkout | One project-local update command can install, test, check, sync, and verify. |
-| S3 | User changes GitHub repo from private to public | The repo has no obvious secret leaks, has a license decision, and has public-friendly install docs. |
+| S3 | User changes GitHub repo from private to public | The repo has no obvious secret leaks, has public-friendly install docs, and records LICENSE as a follow-up. |
 
 ## 5. Requirements
 
 | ID | Requirement | Acceptance | Status |
 |---|---|---|---|
 | R1 | Record evidence-backed CLI/install gaps before implementation | `skillcli audit` findings and file paths are in ROADMAP | Done |
-| R2 | Keep production code unchanged until the design gate is approved | Git diff shows only docs/report changes from this packet | In progress |
+| R2 | Keep production code unchanged until the design gate is approved | Implementation starts only after approval | Done |
 | R3 | Define public-readiness blockers and non-blockers | ROADMAP risk table lists visibility, license, secret scan, and generated artifacts | Done |
-| R4 | Provide and implement a native-release slice | ROADMAP Step 4 lists concrete files and checks | In progress |
+| R4 | Provide and implement a native-release slice | ROADMAP Step 4 lists concrete files and checks | Done |
 
 ## 6. Constraints and Invariants
 
@@ -73,8 +73,7 @@ matches the sibling tool projects and is ready for public release packaging.
    decisions.
 3. **#3**: Public repository work must not publish generated media, local
    virtualenv content, model binaries, or credentials.
-4. **#4**: Changing GitHub visibility requires explicit confirmation after this
-   packet is reviewed.
+4. **#4**: GitHub visibility may change only after explicit user confirmation.
 
 ## 7. Compatibility and Defaults
 
@@ -96,6 +95,6 @@ matches the sibling tool projects and is ready for public release packaging.
 
 | ID | Question | Current judgment | Blocks implementation |
 |---|---|---|---|
-| Q1 | Which LICENSE should this public repo use? | User still needs to choose, or explicitly accept publishing without a license | Yes for public switch |
+| Q1 | Which LICENSE should this public repo use? | User still needs to choose; repo is public without a license for now | No; follow-up |
 | Q2 | Should public distribution remain source-checkout-first or add native GitHub Release installer later? | Native release is now the implementation target | No |
-| Q3 | Should we make the repo public immediately after cleanup? | Only after explicit user confirmation | Yes for visibility change |
+| Q3 | Should we make the repo public immediately after cleanup? | Done after explicit user confirmation | No |
