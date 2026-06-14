@@ -5,7 +5,7 @@
 ## Current Progress
 
 **Phase**: Phase 2 - native install implementation
-**Current Step**: Step 3 in progress; publish `bvr --version`
+**Current Step**: Step 3 done; `bvr --version` available in native install
 
 ### Step Status
 
@@ -14,7 +14,7 @@
 | 0 | Adopt docs-driven root docs | Done |
 | 1 | Decide public-ready CLI/install changes | Done |
 | 2 | Implement native install/update/public changes | Done |
-| 3 | Add terminal version command | In progress |
+| 3 | Add terminal version command | Done |
 
 ---
 
@@ -100,10 +100,11 @@ through native release assets without relying on hidden local state.
 - [x] Add top-level `bvr --version`
 - [x] Document the command in user-facing docs
 - [x] Bump patch version for native release distribution
-- [ ] Publish patch release and update local native install
+- [x] Publish patch release and update local native install
 - [x] Run verification suite
 
 **Acceptance**:
 1. `bvr --version` or module-form equivalent prints the active package version.
 2. Unit tests pass.
 3. `docdev audit` has no findings.
+4. Local native `bvr` on PATH reports `0.1.1`.

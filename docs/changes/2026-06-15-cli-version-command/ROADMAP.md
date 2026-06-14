@@ -5,7 +5,7 @@
 ## 0. Current Status
 
 **Phase**: Implementation
-**Current Step**: Step 3 - release and local install verification
+**Current Step**: Step 3 - verified and closed
 **Architecture Omission Reason**: Omitted; this change only exposes an existing
 package version through the CLI parser and uses the existing release/install
 lifecycle without changing its structure.
@@ -24,10 +24,10 @@ lifecycle without changing its structure.
 
 ### Completion Gate
 
-- [ ] All implementation tasks complete or have explicit skip reasons
-- [ ] Acceptance criteria verified one by one
-- [ ] Docs match final implementation
-- [ ] Remaining risks and follow-up work recorded
+- [x] All implementation tasks complete or have explicit skip reasons
+- [x] Acceptance criteria verified one by one
+- [x] Docs match final implementation
+- [x] Remaining risks and follow-up work recorded
 
 ## 2. Research Log
 
@@ -45,7 +45,7 @@ lifecycle without changing its structure.
 | 0 | Establish packet | Done |
 | 1 | Define scope and research | Done |
 | 2 | Implement code, tests, and docs | Done |
-| 3 | Verify and close | In progress |
+| 3 | Verify and close | Done |
 
 ---
 
@@ -102,8 +102,8 @@ ARCHITECTURE is needed.
 - [x] Run module-form version command
 - [x] Run `docdev audit`
 - [x] Smoke test packaged native install from local release assets
-- [ ] Package and publish patch release
-- [ ] Update local native install
+- [x] Package and publish patch release
+- [x] Update local native install
 
 **Acceptance**:
 1. All verification rows pass.
@@ -116,11 +116,13 @@ ARCHITECTURE is needed.
 | AC-2 | `PYTHONPATH=src python3 -m unittest discover -s tests` | Pass | 11 tests passed |
 | AC-3 | `PYTHONPATH=src python3 -m bilibili_video_reading.cli update --help` | Pass | Existing `update --version VERSION` remains scoped to update |
 | AC-4 | `docdev audit /Users/chihoyo/Project/bilibili-video-reading --write-report` | Pass | No findings |
-| AC-5 | `bvr --version` after native update | Pending |  |
+| AC-5 | `bvr --version` after native update | Pass | Printed `bvr 0.1.1`; `which -a bvr` shows only `/Users/chihoyo/.local/bin/bvr` |
 | AC-6 | `env BVR_INSTALL_ROOT=/private/tmp/bvr-version-smoke-20260615/root ... ./scripts/install_remote.sh --release-base-url file:///Users/chihoyo/Project/bilibili-video-reading/dist/releases --sync-skill` | Pass | Installed packaged `v0.1.1`; temp launcher printed `bvr 0.1.1` |
+| AC-7 | `gh release view v0.1.1 --json tagName,url,name,isDraft,isPrerelease,publishedAt` | Pass | Published release `bvr v0.1.1` |
+| AC-8 | `curl -I -L https://github.com/hongzhiyin/bilibili-video-reading/releases/latest/download/install_remote.sh` | Pass | Latest installer redirects to `v0.1.1` and returns HTTP 200 |
 
 ## 5. Risks and Follow-Up
 
 | ID | Risk / Follow-up | Impact | Handling |
 |---|---|---|---|
-| F-1 | Existing release `v0.1.0` does not include this command | Public latest release must move forward before terminal `bvr --version` works after native install | Publish patch release `v0.1.1` |
+| F-1 | Existing release `v0.1.0` did not include this command | Public latest release had to move forward before terminal `bvr --version` worked after native install | Published patch release `v0.1.1` and updated local native install |
