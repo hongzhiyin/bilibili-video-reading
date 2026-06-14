@@ -35,6 +35,7 @@ artifacts for agents.
 
 | Command | Purpose | Side effects |
 |---|---|---|
+| `bvr --version` | Print the installed CLI version | No file writes |
 | `bvr parse <source>` | Parse a Bilibili URL or BVID without network access | No file writes |
 | `bvr diagnose <source>` | Produce an issue-ready subtitle/media fallback diagnostic report | Writes output directory artifacts and optional manifest |
 | `bvr subtitles export <source>` | Resolve and export subtitle JSON, SRT, transcript, and manifest evidence | Writes output directory artifacts |

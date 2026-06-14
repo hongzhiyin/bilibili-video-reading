@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from . import __version__
 from .asr import WhisperCppOptions, transcribe_whisper_cpp
 from .common import (
     DEFAULT_MEDIA_FORMAT,
@@ -225,6 +226,7 @@ def cmd_tools_doctor(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="bvr", description="Deterministic helpers for Bilibili video reading.")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     parse_parser = subparsers.add_parser("parse", help="Parse a Bilibili URL or BVID without network access.")

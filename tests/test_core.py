@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
+from bilibili_video_reading import __version__
 from bilibili_video_reading.bilibili import choose_subtitle, parse_binary_subtitle_index
+from bilibili_video_reading.cli import main
 from bilibili_video_reading.common import extract_bvid, safe_stem
 from bilibili_video_reading.media import classify_yt_dlp_failure
 from bilibili_video_reading.net import redact_url
@@ -14,6 +18,14 @@ from bilibili_video_reading.subtitles import convert_subtitle_json, timestamp_sh
 
 
 class CoreHelpersTest(unittest.TestCase):
+    def test_cli_version_flag_prints_package_version(self) -> None:
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            with self.assertRaises(SystemExit) as raised:
+                main(["--version"])
+        self.assertEqual(raised.exception.code, 0)
+        self.assertEqual(output.getvalue().strip(), f"bvr {__version__}")
+
     def test_extract_bvid_from_url_or_raw_value(self) -> None:
         self.assertEqual(extract_bvid("https://www.bilibili.com/video/BV1NyVr6hEsh/"), "BV1NyVr6hEsh")
         self.assertEqual(extract_bvid("BV1NyVr6hEsh"), "BV1NyVr6hEsh")

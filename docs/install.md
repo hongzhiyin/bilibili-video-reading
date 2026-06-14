@@ -65,6 +65,18 @@ python3 -m bilibili_video_reading.cli
 The installer does not edit shell startup files. If `~/.local/bin` is not on
 PATH, run `~/.local/bin/bvr` directly or add the directory yourself.
 
+To check the installed CLI version:
+
+```bash
+bvr --version
+```
+
+If `bvr` is not on PATH:
+
+```bash
+~/.local/bin/bvr --version
+```
+
 To update a native install:
 
 ```bash

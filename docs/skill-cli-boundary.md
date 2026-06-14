@@ -27,6 +27,7 @@ bilibili-video-reading/
 
 ## CLI Responsibilities
 
+- `bvr --version`: print the installed CLI version without network access.
 - `bvr parse <source>`: extract BVID and canonical URL without network access.
 - `bvr diagnose <source>`: produce an issue-ready report combining DNS, tool capability, video resolution, subtitle lookup/body download, and optional `yt-dlp` audio fallback status.
 - `bvr subtitles export <source>`: public subtitle lookup, WBI fallback, subtitle index parsing, direct subtitle URL download, SRT/transcript conversion.

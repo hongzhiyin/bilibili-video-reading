@@ -5,7 +5,7 @@
 ## Current Progress
 
 **Phase**: Phase 2 - native install implementation
-**Current Step**: Step 2 done; repository is public; LICENSE remains follow-up
+**Current Step**: Step 3 in progress; publish `bvr --version`
 
 ### Step Status
 
@@ -14,6 +14,7 @@
 | 0 | Adopt docs-driven root docs | Done |
 | 1 | Decide public-ready CLI/install changes | Done |
 | 2 | Implement native install/update/public changes | Done |
+| 3 | Add terminal version command | In progress |
 
 ---
 
@@ -88,3 +89,21 @@ through native release assets without relying on hidden local state.
 | Native installer is Unix-shell only | Windows users need manual/source checkout path for now | Track PowerShell parity as a future release |
 | Dirty working tree contains user changes | Accidental overwrite or mixed ownership | Keep implementation scoped and review diffs before edits |
 | GitHub visibility change is irreversible in effect | Private history becomes public | Completed only after explicit user confirmation |
+
+---
+
+## Step 3 - Add Terminal Version Command
+
+**Goal**: Let users confirm the active `bvr` CLI version from the terminal.
+
+**Tasks**:
+- [x] Add top-level `bvr --version`
+- [x] Document the command in user-facing docs
+- [x] Bump patch version for native release distribution
+- [ ] Publish patch release and update local native install
+- [x] Run verification suite
+
+**Acceptance**:
+1. `bvr --version` or module-form equivalent prints the active package version.
+2. Unit tests pass.
+3. `docdev audit` has no findings.
