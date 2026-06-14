@@ -19,7 +19,7 @@ from .diagnose import DiagnoseOptions, diagnose
 from .manifest import write_manifest
 from .media import MediaDownloadOptions, VisualSampleOptions, download_media, sample_visuals
 from .net import redact_for_output
-from .release import cmd_uninstall, cmd_update
+from .release import cmd_sync_skill, cmd_uninstall, cmd_update
 from .subtitles import SubtitleExportOptions, convert_subtitle_json, export_subtitles
 from .tools import check_tools, doctor
 
@@ -344,6 +344,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     update_parser.set_defaults(sync_skill=True)
     update_parser.set_defaults(func=cmd_update)
+
+    sync_parser = subparsers.add_parser("sync-skill", help="Sync the installed skill to agent skill homes.")
+    sync_parser.add_argument(
+        "--targets",
+        default="codex",
+        help="Comma-separated targets: codex,cursor,agents,claude,all. Default: codex.",
+    )
+    sync_parser.add_argument("--force", action="store_true", help="Replace existing owned skill files where needed.")
+    sync_parser.add_argument("--dry-run", action="store_true", help="Print target paths without writing files.")
+    sync_parser.set_defaults(func=cmd_sync_skill)
 
     uninstall_parser = subparsers.add_parser("uninstall", help="Remove a native release install and owned skill targets.")
     uninstall_parser.add_argument("--install-root", default=None, help="Override BVR_INSTALL_ROOT.")

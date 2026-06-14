@@ -60,6 +60,23 @@ def cmd_update(args: argparse.Namespace) -> int:
     return subprocess.run(command, check=False, env=env).returncode
 
 
+def cmd_sync_skill(args: argparse.Namespace) -> int:
+    root = source_root()
+    sync_script = root / "scripts" / "sync_skill.sh"
+    if not sync_script.exists():
+        raise SystemExit(f"Skill sync script missing: {sync_script}")
+
+    command = [str(sync_script)]
+    if args.targets:
+        command.extend(["--targets", args.targets])
+    if args.force:
+        command.append("--force")
+    if args.dry_run:
+        command.append("--dry-run")
+
+    return subprocess.run(command, check=False, env=os.environ.copy()).returncode
+
+
 def resolve_install_root(raw: str | None = None) -> Path:
     if raw:
         return Path(raw).expanduser()

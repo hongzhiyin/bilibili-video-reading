@@ -36,6 +36,7 @@ artifacts for agents.
 | Command | Purpose | Side effects |
 |---|---|---|
 | `bvr --version` | Print the installed CLI version | No file writes |
+| `bvr sync-skill` | Refresh installed skill targets and generated skill-local `bin/bvr` wrappers | Writes configured skill target dirs |
 | `bvr parse <source>` | Parse a Bilibili URL or BVID without network access | No file writes |
 | `bvr diagnose <source>` | Produce an issue-ready subtitle/media fallback diagnostic report | Writes output directory artifacts and optional manifest |
 | `bvr subtitles export <source>` | Resolve and export subtitle JSON, SRT, transcript, and manifest evidence | Writes output directory artifacts |
@@ -55,6 +56,8 @@ artifacts for agents.
 - A synced installed skill should be able to find the deterministic CLI from an
   arbitrary working directory through `bvr`, a skill-local `bin/bvr`, or an
   explicit source checkout fallback.
+- Skill sync should be available both through the project script
+  (`./scripts/sync_skill.sh`) and through the installed CLI (`bvr sync-skill`).
 - Update flow should be one command for native installs (`bvr update`) and one
   command for source checkouts (`./scripts/update_cli.sh`).
 

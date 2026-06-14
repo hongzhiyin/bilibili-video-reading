@@ -193,7 +193,13 @@ BVR_RELEASE_BASE_URL="file://$PWD/dist/releases" ./scripts/install_remote.sh
 
 ## Install or Sync Skill
 
-From the repo root:
+From an installed native CLI or source checkout wrapper:
+
+```bash
+bvr sync-skill --targets codex,cursor,agents,claude --force
+```
+
+From the repo root, the script entrypoint is still available:
 
 ```bash
 ./scripts/sync_skill.sh
@@ -216,6 +222,7 @@ Supported sync targets:
 
 ```bash
 ./scripts/sync_skill.sh --targets codex,cursor,agents,claude --force
+bvr sync-skill --targets codex,cursor,agents,claude --force
 ```
 
 ## Model Assets

@@ -51,6 +51,12 @@ curl -fsSL https://github.com/hongzhiyin/bilibili-video-reading/releases/latest/
 ```
 
 The installed skill delegates deterministic work to the current `bvr` CLI.
+If this skill looks stale after a source or release update, refresh installed
+skill targets with:
+
+```bash
+bvr sync-skill --targets codex,cursor,agents,claude --force
+```
 
 Unless the user asks to save artifacts elsewhere, put run artifacts under:
 

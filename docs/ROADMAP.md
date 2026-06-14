@@ -5,7 +5,7 @@
 ## Current Progress
 
 **Phase**: Phase 2 - native install implementation
-**Current Step**: Step 3 done; `bvr --version` available in native install
+**Current Step**: Step 4 in progress; add explicit `bvr sync-skill`
 
 ### Step Status
 
@@ -15,6 +15,7 @@
 | 1 | Decide public-ready CLI/install changes | Done |
 | 2 | Implement native install/update/public changes | Done |
 | 3 | Add terminal version command | Done |
+| 4 | Add explicit skill sync command | In progress |
 
 ---
 
@@ -108,3 +109,21 @@ through native release assets without relying on hidden local state.
 2. Unit tests pass.
 3. `docdev audit` has no findings.
 4. Local native `bvr` on PATH reports `0.1.1`.
+
+---
+
+## Step 4 - Add Explicit Skill Sync Command
+
+**Goal**: Let users refresh installed skill targets through the `bvr` CLI.
+
+**Tasks**:
+- [x] Add `bvr sync-skill`
+- [x] Reuse `scripts/sync_skill.sh`
+- [x] Document the command in user-facing docs and skill instructions
+- [ ] Publish patch release and update local native install
+- [ ] Run verification suite
+
+**Acceptance**:
+1. `bvr sync-skill --help` exposes the command.
+2. `bvr sync-skill --targets codex --dry-run` exits successfully.
+3. Unit tests, `skillcli audit`, and `docdev audit` pass.

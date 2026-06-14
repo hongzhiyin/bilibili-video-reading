@@ -42,6 +42,7 @@ The skill source lives in `skill/` and can be synced to:
 ```bash
 make install
 bvr --version
+bvr sync-skill --targets codex,cursor,agents,claude --force
 bvr tools doctor
 bvr update
 bvr diagnose "https://www.bilibili.com/video/BV..." --try-media

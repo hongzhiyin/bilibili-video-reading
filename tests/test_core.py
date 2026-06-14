@@ -5,6 +5,7 @@ import io
 import json
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from bilibili_video_reading import __version__
@@ -25,6 +26,22 @@ class CoreHelpersTest(unittest.TestCase):
                 main(["--version"])
         self.assertEqual(raised.exception.code, 0)
         self.assertEqual(output.getvalue().strip(), f"bvr {__version__}")
+
+    def test_cli_sync_skill_invokes_project_script(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sync_script = root / "scripts" / "sync_skill.sh"
+            sync_script.parent.mkdir()
+            sync_script.write_text("#!/bin/sh\n", encoding="utf-8")
+
+            completed = mock.Mock(returncode=0)
+            with mock.patch("bilibili_video_reading.release.source_root", return_value=root):
+                with mock.patch("bilibili_video_reading.release.subprocess.run", return_value=completed) as run:
+                    code = main(["sync-skill", "--targets", "codex,agents", "--force", "--dry-run"])
+
+            self.assertEqual(code, 0)
+            command = run.call_args.args[0]
+            self.assertEqual(command, [str(sync_script), "--targets", "codex,agents", "--force", "--dry-run"])
 
     def test_extract_bvid_from_url_or_raw_value(self) -> None:
         self.assertEqual(extract_bvid("https://www.bilibili.com/video/BV1NyVr6hEsh/"), "BV1NyVr6hEsh")
